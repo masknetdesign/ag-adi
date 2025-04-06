@@ -1,0 +1,214 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Administração da Igreja</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f8f9fa;
+      color: #333;
+    }
+    header {
+      background-color: #2c3e50;
+      color: #fff;
+      padding: 2rem 1rem;
+      text-align: center;
+      border-bottom-left-radius: 15px;
+      border-bottom-right-radius: 15px;
+    }
+    header h1 {
+      font-size: 2rem;
+      font-weight: bold;
+    }
+    .container {
+      max-width: 800px;
+      margin: 2rem auto;
+      background: #fff;
+      padding: 2rem;
+      border-radius: 15px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    h2 {
+      margin-top: 2rem;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 0.5rem;
+    }
+    label {
+      display: block;
+      margin-top: 1rem;
+      font-weight: 600;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 0.6rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-top: 0.5rem;
+      font-size: 1rem;
+    }
+    button {
+      margin-top: 1rem;
+      padding: 0.7rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      background-color: #2c3e50;
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .icon-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 0.5rem;
+      max-height: 150px;
+      overflow-y: auto;
+      background-color: #f1f1f1;
+      padding: 10px;
+      border-radius: 8px;
+    }
+    .icon-item {
+      padding: 8px;
+      background: #ecf0f1;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 1rem;
+    }
+    .icon-item:hover {
+      background: #d0dce4;
+    }
+  </style>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+    apiKey: "AIzaSyBkrBLKuklZgPm1nz2G997ULiYycZMb9F8",
+    authDomain: "avisoseeventos.firebaseapp.com",
+    databaseURL: "https://avisoseeventos-default-rtdb.firebaseio.com",
+    projectId: "avisoseeventos",
+    storageBucket: "avisoseeventos.appspot.com",
+    messagingSenderId: "247706769451",
+    appId: "1:247706769451:web:ce31cd9d0ca22cd267b26e",
+    measurementId: "G-QE1Z4RQ60T"
+  };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+  </script>
+
+</head>
+<body>
+  <header>
+    <h1>Administração da Igreja</h1>
+    <p>Gerencie categorias, eventos e ensaios</p>
+  </header>
+
+  <div class="container">
+    <h2>Cadastrar Categoria</h2>
+    <label for="nomeCategoria">Nome da Categoria</label>
+    <input type="text" id="nomeCategoria">
+    <label>Escolha um ícone</label>
+    <input type="text" id="iconeCategoria" placeholder="fa-icon" readonly>
+    <div class="icon-list" id="listaIconesCategoria"></div>
+    <button onclick="cadastrar('categoria')">Salvar Categoria</button>
+
+    <h2>Cadastrar Evento</h2>
+    <label for="tituloEvento">Título</label>
+    <input type="text" id="tituloEvento">
+    <label>Escolha um ícone</label>
+    <input type="text" id="iconeEvento" placeholder="fa-icon" readonly>
+    <div class="icon-list" id="listaIconesEvento"></div>
+    <label for="dataEvento">Data</label>
+    <input type="date" id="dataEvento">
+    <label for="descricaoEvento">Descrição</label>
+    <textarea id="descricaoEvento"></textarea>
+    <button onclick="cadastrar('evento')">Salvar Evento</button>
+
+    <h2>Cadastrar Ensaio</h2>
+    <label for="tituloEnsaio">Título</label>
+    <input type="text" id="tituloEnsaio">
+    <label>Escolha um ícone</label>
+    <input type="text" id="iconeEnsaio" placeholder="fa-icon" readonly>
+    <div class="icon-list" id="listaIconesEnsaio"></div>
+    <label for="dataEnsaio">Data</label>
+    <input type="date" id="dataEnsaio">
+    <label for="descricaoEnsaio">Descrição</label>
+    <textarea id="descricaoEnsaio"></textarea>
+    <button onclick="cadastrar('ensaio')">Salvar Ensaio</button>
+  </div>
+
+  <script>
+    const icones = [
+      "fa-church", "fa-music", "fa-praying-hands", "fa-book", "fa-users",
+      "fa-heart", "fa-hands", "fa-dove", "fa-cross", "fa-globe"
+    ];
+    function criarListaIcones(listaId, inputId) {
+      const lista = document.getElementById(listaId);
+      const input = document.getElementById(inputId);
+      lista.innerHTML = "";
+      icones.forEach(icon => {
+        const item = document.createElement("div");
+        item.className = "icon-item";
+        item.innerHTML = `<i class='fas ${icon}'></i> ${icon}`;
+        item.onclick = () => input.value = icon;
+        lista.appendChild(item);
+      });
+    }
+    
+    function cadastrar(tipo) {
+      if (tipo === 'categoria') {
+        const nome = document.getElementById("nomeCategoria").value;
+        const icone = document.getElementById("iconeCategoria").value;
+        db.ref("categorias").push({ nome, icone });
+        alert(`Categoria "${nome}" cadastrada!`);
+      }
+      if (tipo === 'evento') {
+        const titulo = document.getElementById("tituloEvento").value;
+        const icone = document.getElementById("iconeEvento").value;
+        const data = document.getElementById("dataEvento").value;
+        const descricao = document.getElementById("descricaoEvento").value;
+        db.ref("eventos").push({ titulo, icone, data, descricao });
+        alert(`Evento "${titulo}" cadastrado!`);
+      }
+      if (tipo === 'ensaio') {
+        const titulo = document.getElementById("tituloEnsaio").value;
+        const icone = document.getElementById("iconeEnsaio").value;
+        const data = document.getElementById("dataEnsaio").value;
+        const descricao = document.getElementById("descricaoEnsaio").value;
+        db.ref("ensaios").push({ titulo, icone, data, descricao });
+        alert(`Ensaio "${titulo}" cadastrado!`);
+      }
+    }
+      if (tipo === 'evento') {
+        const titulo = document.getElementById("tituloEvento").value;
+        const icone = document.getElementById("iconeEvento").value;
+        const data = document.getElementById("dataEvento").value;
+        const descricao = document.getElementById("descricaoEvento").value;
+        alert(`Evento "${titulo}" cadastrado com ícone "${icone}" para o dia ${data}.`);
+      }
+      if (tipo === 'ensaio') {
+        const titulo = document.getElementById("tituloEnsaio").value;
+        const icone = document.getElementById("iconeEnsaio").value;
+        const data = document.getElementById("dataEnsaio").value;
+        const descricao = document.getElementById("descricaoEnsaio").value;
+        alert(`Ensaio "${titulo}" cadastrado com ícone "${icone}" para o dia ${data}.`);
+      }
+    }
+    document.addEventListener("DOMContentLoaded", () => {
+      criarListaIcones("listaIconesCategoria", "iconeCategoria");
+      criarListaIcones("listaIconesEvento", "iconeEvento");
+      criarListaIcones("listaIconesEnsaio", "iconeEnsaio");
+    });
+  </script>
+</body>
+</html>
